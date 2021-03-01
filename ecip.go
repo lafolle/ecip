@@ -38,9 +38,9 @@ func (ecip Ecip) Name() string { return "ecip" }
 func (ecip Ecip) getClientIP(w dns.ResponseWriter) string {
 
 	if addr, ok := w.RemoteAddr().(*net.UDPAddr); ok {
-		return addr.String()
+		return addr.IP.String()
 	}
 
 	addr, _ := w.RemoteAddr().(*net.TCPAddr)
-	return addr.String()
+	return addr.IP.String()
 }
