@@ -6,6 +6,7 @@ package ecip
 
 import (
 	"context"
+	"fmt"
 	"net"
 
 	"github.com/coredns/coredns/plugin"
@@ -28,7 +29,19 @@ type Ecip struct {
 func (ecip Ecip) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg) (int, error) {
 	addr := ecip.getClientIP(w)
 
-	cipqc.WithLabelValues(addr)
+	names, err := net.LookupAddr(addr)
+	if err != nil {
+		fmt.Println("ecip: failed to lookup for:", addr, "err:", err)
+		return 0, err
+	}
+	if len(names) == 0 {
+		fmt.Println(" ecip: names empty:", addr, "err:", err)
+		return 0, err
+	}
+
+	chosen_name := names[0]
+
+	cipqc.WithLabelValues(chosen_name)
 
 	return plugin.NextOrFailure(ecip.Name(), ecip.Next, ctx, w, r)
 }
